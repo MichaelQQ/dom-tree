@@ -107,6 +107,6 @@ const traceDOMTree = (fn, tree) => {
 
 const checkPaired = traceDOMTree.bind(null, (node) => {
   if (!node.paired) {
-    throw { Error: `Tag must be paired: ${now.tag}` };
+    throw { Error: `Tag must be paired: ${node.tag}` };
   }
 });
