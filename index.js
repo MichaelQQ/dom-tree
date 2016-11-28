@@ -2,7 +2,7 @@ const fs = require('fs');
 
 fs.readFile('./index.html', 'utf8', (error, data) => {
   if (error) throw error;
-  
+
   try {
     const DOMStack = getDOMStack(data);
     const DOMTree = createDOMTree(DOMStack)
@@ -13,8 +13,8 @@ fs.readFile('./index.html', 'utf8', (error, data) => {
 });
 
 const getDOMStack = (str, DOMStack = []) => {
-  const result = str.trim().match(/(<([!\/]?)([\w]+)([\w\s="-:\.\/\\]*)(\/?)>)([\s\S]*)/);
-  
+  const result = str.trim().match(/(<([!\/]?)([\w]+)([\w\s="-:;\.\/\\]*)(\/?)>)([\s\S]*)/);
+
   // trace done
   if (result === null)
     return DOMStack;
@@ -24,7 +24,7 @@ const getDOMStack = (str, DOMStack = []) => {
       ...DOMStack,
       checkDOMObject(str.trim().substring(0, result.index)),
       checkDOMObject(result)]);
-  
+
   return getDOMStack(result[6], [...DOMStack, checkDOMObject(result)]);
 };
 
@@ -40,7 +40,7 @@ const checkDOMObject = (result) => {
     type: 'String',
     paired: true
   };
-  
+
   if (result[5] || checkAutoCloseTag(result[3].toLowerCase())) {
     // Auto close
     return {
@@ -75,8 +75,9 @@ const checkDOMObject = (result) => {
 const createDOMTree = (DOMStack, tree = [], tagPair) => {
   // create done
   if (DOMStack.length === 0) return tree;
-  
+
   let [now, ...rest] = DOMStack;
+  console.log(now.tag);
   if (now.type === 'close') {
     if (tagPair && tagPair !== now.tagName) {
       throw { Error: `Tag must be paired: ${now.tag}` };
@@ -93,9 +94,10 @@ const createDOMTree = (DOMStack, tree = [], tagPair) => {
 };
 
 const checkAutoCloseTag = (tagName) => {
-  return tagName === 'doctype' 
+  return tagName === 'doctype'
     || tagName === 'img'
-    || tagName === 'meta';
+    || tagName === 'meta'
+    || tagName === 'br';
 };
 
 const traceDOMTree = (fn, tree) => {
