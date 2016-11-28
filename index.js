@@ -28,6 +28,18 @@ const getDOMStack = (str, DOMStack = []) => {
   return getDOMStack(result[6], [...DOMStack, checkDOMObject(result)]);
 };
 
+const createAttributObject = (attr) => {
+  return attr
+    .trim()
+    .split(/[\s]+/)
+    .reduce((attrObj, attr) => {
+      const [name, value] = attr.split('=');
+      const trueValue = value && value.substring(1, value.length - 1);
+      if (!name) return attrObj;
+      return Object.assign({}, attrObj, { [name]: trueValue });
+    }, {});
+};
+
 const checkDOMObject = (result) => {
   // result[1]: <!doctype html />
   // result[2]: !
@@ -46,7 +58,7 @@ const checkDOMObject = (result) => {
     return {
       tag: result[1],
       tagName: result[3],
-      attributes: result[4],
+      attributes: createAttributObject(result[4]),
       children: [],
       type: 'autoClose',
       paired: true
@@ -56,7 +68,7 @@ const checkDOMObject = (result) => {
     if (result[2]) return {
       tag: result[1],
       tagName: result[3],
-      attributes: result[4],
+      attributes: createAttributObject(result[4]),
       type: 'close',
       paired: true
     };
@@ -64,7 +76,7 @@ const checkDOMObject = (result) => {
     return {
       tag: result[1],
       tagName: result[3],
-      attributes: result[4],
+      attributes: createAttributObject(result[4]),
       children: [],
       type: 'open',
       paired: false
@@ -77,7 +89,6 @@ const createDOMTree = (DOMStack, tree = [], tagPair) => {
   if (DOMStack.length === 0) return tree;
 
   let [now, ...rest] = DOMStack;
-  console.log(now.tag);
   if (now.type === 'close') {
     if (tagPair && tagPair !== now.tagName) {
       throw { Error: `Tag must be paired: ${now.tag}` };
